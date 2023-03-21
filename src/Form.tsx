@@ -6,7 +6,7 @@ import {
   FormData,
   FormValues,
 } from "./Form.types";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect } from "react";
 import { FieldValidation, VALIDATIONS } from "./Configs/Validation.config";
 
 export const RegistrationForm: React.FC<RegistrationProps> = ({
@@ -61,11 +61,14 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
     }));
   };
 
-  const onSubmit = () => {
-    const allFieldsAreValid = Object.entries(fieldData).every(
+  const areAllFieldsValid = () => {
+    return Object.entries(fieldData).every(
       ([_, value]) => value.validateStatus === "success"
     );
-    if (allFieldsAreValid) {
+  };
+
+  const onSubmit = () => {
+    if (areAllFieldsValid()) {
       const fieldValuesObject = Object.fromEntries(
         Object.entries(fieldData).map(([key, value]) => [key, value.value])
       ) as FormValues;
@@ -80,7 +83,7 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
   const isFieldValid = (field: FormDataKey, value: string) => {
     const errorMessages: string[] = [];
     let isValid = false;
-    
+
     if (Array.isArray(VALIDATIONS[field])) {
       isValid = (VALIDATIONS[field] as FieldValidation[]).every((field) => {
         const valid = field.regex.test(value);
@@ -110,6 +113,10 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
         },
       }));
     };
+
+  useEffect(() => {
+    showIsRequiredErrorMessage();
+  }, []);
 
   return (
     <div className="form-container">

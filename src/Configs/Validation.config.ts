@@ -36,7 +36,7 @@ export const VALIDATIONS: Record<
   ],
   website: {
     regex:
-      /^(http(s)?:\/\/)?([a-z]|[0-9])+\.(([a-z]|[0-9])+\.)+[a-z][a-z]+(:[0-9]+)?$/,
+      /^(http(s)?:\/\/)?([a-z]|[0-9])+\.(([a-z]|[0-9])+\.)*[a-z][a-z]+(:[0-9]+)?$/,
     errorMessage: VALIDATION_ERROR.website,
   },
 };
