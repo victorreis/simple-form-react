@@ -9,10 +9,10 @@ export type ValidationResult = {
 };
 
 export type FormDataKey = "name" | "email" | "password" | "website";
-export type FormData = Record<
-  FormDataKey,
-  { value: string } & ValidationResult
->;
+export type FormDataValue = {
+  value: string;
+} & ValidationResult;
+export type FormData = Record<FormDataKey, FormDataValue>;
 export type FormValues = Record<FormDataKey, string>;
 
 export interface RegistrationProps {

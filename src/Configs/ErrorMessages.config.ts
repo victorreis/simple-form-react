@@ -1,8 +1,11 @@
-import { FormDataKey } from "../Form.types";
-
-export const VALIDATION_ERROR: Record<FormDataKey, string> = {
-  name: `Name should be in the form of "FirstName LastName".`,
-  email: `Email should be a valid email in the form of "email@domain.com" | "foo-bar@123.xy" | "plus+sign@hyphenated-domain.xy"`,
-  password: `Password must have at least 8 characters, 1 uppercase letter, 1 lowercase letter and 1 number.`,
-  website: `Website should be a valid host name (http://domain.com or subdomain.domain.com)`,
+export const VALIDATION_ERROR = {
+  name: `enter a valid name`,
+  email: `enter a valid email address`,
+  password: {
+    minCharacters: "password must have at least 8 characters",
+    uppercase: "password must have at least 1 uppercase letter",
+    lowercase: "password must have at least 1 lowercase letter",
+    number: "password must have at least 1 number",
+  },
+  website: `enter a valid website`,
 };
