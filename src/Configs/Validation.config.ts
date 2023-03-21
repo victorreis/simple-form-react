@@ -5,10 +5,7 @@ export type FieldValidation = { regex: RegExp; errorMessage: string };
 
 const NOT_EMPTY_REGEX = /^.+$/;
 
-export const VALIDATIONS: Record<
-  FormDataKey,
-  FieldValidation[]
-> = {
+export const VALIDATIONS: Record<FormDataKey, FieldValidation[]> = {
   name: [
     {
       regex: NOT_EMPTY_REGEX,
@@ -26,7 +23,7 @@ export const VALIDATIONS: Record<
     },
     {
       regex:
-        /^([A-Z]|[a-z])(\w|-|\+|\.)*([A-Z]|[a-z])@([0-9]|[A-Z]|[a-z])([0-9]|[A-Z]|[a-z]|-)*([0-9]|[A-Z]|[a-z])+\.(com|(([A-Z]|[a-z])([A-Z]|[a-z])))$/,
+        /^([A-Za-z])(\w|-|\+|\.)*([A-Za-z])@\w(\w|-)*\w+\.([A-Za-z][A-Za-z][A-Za-z]*)$/,
       errorMessage: VALIDATION_ERROR.email,
     },
   ],
@@ -59,7 +56,7 @@ export const VALIDATIONS: Record<
     },
     {
       regex:
-        /^(http(s)?:\/\/)?([a-z]|[0-9])+\.(([a-z]|[0-9])+\.)*[a-z][a-z]+(:[0-9]+)?$/,
+        /^(http(s)?:\/\/)?[a-z0-9]+\.([a-z0-9]+\.)*[A-Za-z][A-Za-z]+(:[0-9]+)?$/,
       errorMessage: VALIDATION_ERROR.website,
     },
   ],
