@@ -1,100 +1,35 @@
-import * as React from "react";
+import React, { ChangeEvent, useContext } from "react";
 import { Form, Input, Button } from "antd";
+
+import { FieldValidation, VALIDATIONS } from "./Configs/Validation.config";
+import { FormContext } from "./Form.context";
 import {
   RegistrationProps,
   FormDataKey,
-  FormData,
   FormValues,
+  FormDataValue,
 } from "./Form.types";
-import { ChangeEvent, useEffect } from "react";
-import { FieldValidation, VALIDATIONS } from "./Configs/Validation.config";
 
 export const RegistrationForm: React.FC<RegistrationProps> = ({
   onSuccess,
 }) => {
-  const [fieldData, setFieldData] = React.useState<FormData>({
-    name: {
-      value: "",
-      validateStatus: "success",
-      help: "",
-    },
-    email: {
-      value: "",
-      validateStatus: "success",
-      help: "",
-    },
-    password: {
-      value: "",
-      validateStatus: "success",
-      help: "",
-    },
-    website: {
-      value: "",
-      validateStatus: "success",
-      help: "",
-    },
-  });
+  const { fieldsData, updateFieldsData } = useContext(FormContext);
 
   const layout = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },
   };
 
-  const showIsRequiredErrorMessage = () => {
-    setFieldData((prevState) => ({
-      ...prevState,
-      ...Object.fromEntries(
-        Object.entries(prevState).map(([fieldKey, fieldData]) => {
-          const help =
-            fieldData.value.length === 0
-              ? `${fieldKey} is required`
-              : fieldData.help;
-          const updatedFieldData = {
-            ...fieldData,
-            help,
-            validateStatus: help ? "error" : "sucess",
-          };
-
-          return [fieldKey, updatedFieldData];
-        })
-      ),
-    }));
-  };
-
-  const areAllFieldsValid = () => {
-    return Object.entries(fieldData).every(
-      ([_, value]) => value.validateStatus === "success"
-    );
-  };
-
-  const onSubmit = () => {
-    if (areAllFieldsValid()) {
-      const fieldValuesObject = Object.fromEntries(
-        Object.entries(fieldData).map(([key, value]) => [key, value.value])
-      ) as FormValues;
-
-      onSuccess(fieldValuesObject);
-      return;
-    }
-
-    showIsRequiredErrorMessage();
-  };
-
   const isFieldValid = (field: FormDataKey, value: string) => {
     const errorMessages: string[] = [];
     let isValid = false;
 
-    if (Array.isArray(VALIDATIONS[field])) {
-      isValid = (VALIDATIONS[field] as FieldValidation[]).every((field) => {
-        const valid = field.regex.test(value);
-        if (!valid) errorMessages.push(field.errorMessage);
-        return valid;
-      });
-    } else {
-      const { regex, errorMessage } = VALIDATIONS[field] as FieldValidation;
-      isValid = regex.test(value);
-      if (!isValid) errorMessages.push(errorMessage);
-    }
+    isValid = (VALIDATIONS[field] as FieldValidation[]).every((field) => {
+      const valid = field.regex.test(value);
+      if (!valid) errorMessages.push(field.errorMessage);
+      return valid;
+    });
+
     return { isValid, errorMessages };
   };
 
@@ -104,7 +39,7 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
       const { isValid, errorMessages } = isFieldValid(field, value);
       const help = errorMessages.join("");
 
-      setFieldData((prevState) => ({
+      updateFieldsData((prevState) => ({
         ...prevState,
         [field]: {
           value,
@@ -114,9 +49,46 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
       }));
     };
 
-  useEffect(() => {
-    showIsRequiredErrorMessage();
-  }, []);
+  const validateFieldsUpdateStatusAndShowErrors = () => {
+    updateFieldsData((prevState) => ({
+      ...prevState,
+      ...Object.fromEntries(
+        Object.entries(prevState).map(([fieldKey, fieldValue]) => {
+          const { isValid, errorMessages } = isFieldValid(
+            fieldKey as FormDataKey,
+            fieldValue.value
+          );
+          const updatedFieldValue: FormDataValue = {
+            ...fieldValue,
+            help: errorMessages.join(""),
+            validateStatus: isValid ? "success" : "error",
+          };
+
+          return [fieldKey, updatedFieldValue];
+        })
+      ),
+    }));
+  };
+
+  const areAllFieldsValid = () => {
+    return Object.entries(fieldsData).every(
+      ([fieldKey, fieldValue]) =>
+        isFieldValid(fieldKey as FormDataKey, fieldValue.value).isValid
+    );
+  };
+
+  const onSubmit = () => {
+    if (areAllFieldsValid()) {
+      const fieldValuesObject = Object.fromEntries(
+        Object.entries(fieldsData).map(([key, value]) => [key, value.value])
+      ) as FormValues;
+
+      onSuccess(fieldValuesObject);
+      return;
+    }
+
+    validateFieldsUpdateStatusAndShowErrors();
+  };
 
   return (
     <div className="form-container">
@@ -126,20 +98,20 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
           name="name"
           label="Name"
           required
-          {...fieldData.name}
+          {...fieldsData.name}
         >
-          <Input onChange={updateField("name")} value={fieldData.name.value} />
+          <Input onChange={updateField("name")} value={fieldsData.name.value} />
         </Form.Item>
         <Form.Item
           data-testid="email"
           name="email"
           label="Email"
           required
-          {...fieldData.email}
+          {...fieldsData.email}
         >
           <Input
             onChange={updateField("email")}
-            value={fieldData.email.value}
+            value={fieldsData.email.value}
           />
         </Form.Item>
         <Form.Item
@@ -147,11 +119,11 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
           name="website"
           label="Website"
           required
-          {...fieldData.website}
+          {...fieldsData.website}
         >
           <Input
             onChange={updateField("website")}
-            value={fieldData.website.value}
+            value={fieldsData.website.value}
           />
         </Form.Item>
         <Form.Item
@@ -159,11 +131,11 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
           label="Password"
           name="password"
           required
-          {...fieldData.password}
+          {...fieldsData.password}
         >
           <Input.Password
             onChange={updateField("password")}
-            value={fieldData.password.value}
+            value={fieldsData.password.value}
           />
         </Form.Item>
 
