@@ -7,8 +7,7 @@ import {
   FormValues,
 } from "./Form.types";
 import { ChangeEvent } from "react";
-import { VALIDATION_ERROR } from "./Configs/ErrorMessages.config";
-import { VALIDATIONS } from "./Configs/Validation.config";
+import { FieldValidation, VALIDATIONS } from "./Configs/Validation.config";
 
 export const RegistrationForm: React.FC<RegistrationProps> = ({
   onSuccess,
@@ -29,7 +28,11 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
       validateStatus: "success",
       help: "",
     },
-    website: { value: "", validateStatus: "success", help: "" },
+    website: {
+      value: "",
+      validateStatus: "success",
+      help: "",
+    },
   });
 
   const layout = {
@@ -37,30 +40,73 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
     wrapperCol: { span: 16 },
   };
 
+  const showIsRequiredErrorMessage = () => {
+    setFieldData((prevState) => ({
+      ...prevState,
+      ...Object.fromEntries(
+        Object.entries(prevState).map(([fieldKey, fieldData]) => {
+          const help =
+            fieldData.value.length === 0
+              ? `${fieldKey} is required`
+              : fieldData.help;
+          const updatedFieldData = {
+            ...fieldData,
+            help,
+            validateStatus: help ? "error" : "sucess",
+          };
+
+          return [fieldKey, updatedFieldData];
+        })
+      ),
+    }));
+  };
+
   const onSubmit = () => {
-    onSuccess(
-      Object.fromEntries(
-        Object.entries(fieldData).map(([key, value]) => [key, value.value])
-      ) as FormValues
+    const allFieldsAreValid = Object.entries(fieldData).every(
+      ([_, value]) => value.validateStatus === "success"
     );
+    if (allFieldsAreValid) {
+      const fieldValuesObject = Object.fromEntries(
+        Object.entries(fieldData).map(([key, value]) => [key, value.value])
+      ) as FormValues;
+
+      onSuccess(fieldValuesObject);
+      return;
+    }
+
+    showIsRequiredErrorMessage();
+  };
+
+  const isFieldValid = (field: FormDataKey, value: string) => {
+    const errorMessages: string[] = [];
+    let isValid = false;
+    
+    if (Array.isArray(VALIDATIONS[field])) {
+      isValid = (VALIDATIONS[field] as FieldValidation[]).every((field) => {
+        const valid = field.regex.test(value);
+        if (!valid) errorMessages.push(field.errorMessage);
+        return valid;
+      });
+    } else {
+      const { regex, errorMessage } = VALIDATIONS[field] as FieldValidation;
+      isValid = regex.test(value);
+      if (!isValid) errorMessages.push(errorMessage);
+    }
+    return { isValid, errorMessages };
   };
 
   const updateField =
     (field: FormDataKey) => (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      const isValid =
-        VALIDATIONS[field] instanceof RegExp
-          ? Boolean((VALIDATIONS[field] as RegExp).test(value))
-          : (VALIDATIONS[field] as RegExp[]).every((regex) =>
-              regex.test(value)
-            );
+      const { isValid, errorMessages } = isFieldValid(field, value);
+      const help = errorMessages.join("");
 
       setFieldData((prevState) => ({
         ...prevState,
         [field]: {
           value,
           validateStatus: isValid ? "success" : "error",
-          help: isValid ? "" : VALIDATION_ERROR[field],
+          help,
         },
       }));
     };
