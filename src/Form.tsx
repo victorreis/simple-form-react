@@ -50,9 +50,9 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
       const value = e.target.value;
       const isValid =
         VALIDATIONS[field] instanceof RegExp
-          ? Boolean(value.match(VALIDATIONS[field] as RegExp))
+          ? Boolean((VALIDATIONS[field] as RegExp).test(value))
           : (VALIDATIONS[field] as RegExp[]).every((regex) =>
-              value.match(regex)
+              regex.test(value)
             );
 
       setFieldData((prevState) => ({
@@ -94,7 +94,7 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
           name="website"
           label="Website"
           required
-          {...fieldData.name}
+          {...fieldData.website}
         >
           <Input
             onChange={updateField("website")}
