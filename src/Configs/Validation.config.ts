@@ -1,22 +1,40 @@
 import { FormDataKey } from "../Form.types";
-import { VALIDATION_ERROR } from "./ErrorMessages.config";
+import { REQUIRED_ERROR, VALIDATION_ERROR } from "./ErrorMessages.config";
 
 export type FieldValidation = { regex: RegExp; errorMessage: string };
 
+const NOT_EMPTY_REGEX = /^.+$/;
+
 export const VALIDATIONS: Record<
   FormDataKey,
-  FieldValidation | FieldValidation[]
+  FieldValidation[]
 > = {
-  name: {
-    regex: /^[A-Z][a-z]* [A-Z][a-z]*$/,
-    errorMessage: VALIDATION_ERROR.name,
-  },
-  email: {
-    regex:
-      /^([A-Z]|[a-z])(\w|-|\+|\.)*([A-Z]|[a-z])@([0-9]|[A-Z]|[a-z])([0-9]|[A-Z]|[a-z]|-)*([0-9]|[A-Z]|[a-z])+\.(com|(([A-Z]|[a-z])([A-Z]|[a-z])))$/,
-    errorMessage: VALIDATION_ERROR.email,
-  },
+  name: [
+    {
+      regex: NOT_EMPTY_REGEX,
+      errorMessage: REQUIRED_ERROR("name"),
+    },
+    {
+      regex: /^[A-Z][a-z]* [A-Z][a-z]*$/,
+      errorMessage: VALIDATION_ERROR.name,
+    },
+  ],
+  email: [
+    {
+      regex: NOT_EMPTY_REGEX,
+      errorMessage: REQUIRED_ERROR("email"),
+    },
+    {
+      regex:
+        /^([A-Z]|[a-z])(\w|-|\+|\.)*([A-Z]|[a-z])@([0-9]|[A-Z]|[a-z])([0-9]|[A-Z]|[a-z]|-)*([0-9]|[A-Z]|[a-z])+\.(com|(([A-Z]|[a-z])([A-Z]|[a-z])))$/,
+      errorMessage: VALIDATION_ERROR.email,
+    },
+  ],
   password: [
+    {
+      regex: NOT_EMPTY_REGEX,
+      errorMessage: REQUIRED_ERROR("password"),
+    },
     {
       regex: /^.{8}.*$/,
       errorMessage: VALIDATION_ERROR.password.minCharacters,
@@ -34,9 +52,15 @@ export const VALIDATIONS: Record<
       errorMessage: VALIDATION_ERROR.password.number,
     },
   ],
-  website: {
-    regex:
-      /^(http(s)?:\/\/)?([a-z]|[0-9])+\.(([a-z]|[0-9])+\.)*[a-z][a-z]+(:[0-9]+)?$/,
-    errorMessage: VALIDATION_ERROR.website,
-  },
+  website: [
+    {
+      regex: NOT_EMPTY_REGEX,
+      errorMessage: REQUIRED_ERROR("website"),
+    },
+    {
+      regex:
+        /^(http(s)?:\/\/)?([a-z]|[0-9])+\.(([a-z]|[0-9])+\.)*[a-z][a-z]+(:[0-9]+)?$/,
+      errorMessage: VALIDATION_ERROR.website,
+    },
+  ],
 };

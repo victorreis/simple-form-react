@@ -1,3 +1,4 @@
+export const REQUIRED_ERROR = (fieldName: string) => `${fieldName} is required`;
 export const VALIDATION_ERROR = {
   name: `enter a valid name`,
   email: `enter a valid email address`,
