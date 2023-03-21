@@ -8,6 +8,7 @@ import {
 } from "./Form.types";
 import { ChangeEvent } from "react";
 import { VALIDATION_ERROR } from "./Configs/ErrorMessages.config";
+import { VALIDATIONS } from "./Configs/Validation.config";
 
 export const RegistrationForm: React.FC<RegistrationProps> = ({
   onSuccess,
@@ -46,12 +47,20 @@ export const RegistrationForm: React.FC<RegistrationProps> = ({
 
   const updateField =
     (field: FormDataKey) => (e: ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      const isValid =
+        VALIDATIONS[field] instanceof RegExp
+          ? Boolean(value.match(VALIDATIONS[field] as RegExp))
+          : (VALIDATIONS[field] as RegExp[]).every((regex) =>
+              value.match(regex)
+            );
+
       setFieldData((prevState) => ({
         ...prevState,
         [field]: {
-          value: e.target.value,
-          validateStatus: "success",
-          help: "",
+          value,
+          validateStatus: isValid ? "success" : "error",
+          help: isValid ? "" : VALIDATION_ERROR[field],
         },
       }));
     };
