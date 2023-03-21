@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 
 import { RegistrationForm } from "./Form";
+import { FormProvider } from "./Form.context";
 
 beforeEach(cleanup);
 
@@ -21,10 +22,23 @@ global.matchMedia =
   };
 
 describe("RegistrationForm", () => {
-  it("all fields are required", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
+  const onFinishMock = jest.fn(() => Promise.resolve());
 
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+  const setup = () => {
+    return {
+      utils: render(
+        <FormProvider>
+          <RegistrationForm onSuccess={onFinishMock} />
+        </FormProvider>
+      ),
+      onFinishMock,
+    };
+  };
+
+  beforeEach(cleanup);
+
+  it("all fields are required", async () => {
+    const { utils, onFinishMock } = setup();
     fireEvent.click(utils.getByText("Submit"));
 
     const nameField = utils.getByTestId("name");
@@ -43,8 +57,7 @@ describe("RegistrationForm", () => {
   });
 
   it("fields are accepted when filled in", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils, onFinishMock } = setup();
 
     fireEvent.change(utils.getByLabelText(/name/i), {
       target: { value: "Foo Bar" },
@@ -83,8 +96,7 @@ describe("RegistrationForm", () => {
   });
 
   it("name is validated correctly", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils, onFinishMock } = setup();
 
     fireEvent.change(utils.getByLabelText(/name/i), {
       target: { value: "SingleName" },
@@ -96,8 +108,7 @@ describe("RegistrationForm", () => {
   });
 
   it("email is validated correctly", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils, onFinishMock } = setup();
 
     fireEvent.change(utils.getByLabelText(/email/i), {
       target: { value: "foo" },
@@ -109,8 +120,7 @@ describe("RegistrationForm", () => {
   });
 
   it("email with numeric domain should be valid", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils } = setup();
 
     const emailField = utils.getByTestId("email");
     fireEvent.change(utils.getByLabelText(/email/i), {
@@ -123,8 +133,7 @@ describe("RegistrationForm", () => {
   });
 
   it("email with hyphenated domain should be valid", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils } = setup();
 
     const emailField = utils.getByTestId("email");
     fireEvent.change(utils.getByLabelText(/email/i), {
@@ -137,8 +146,7 @@ describe("RegistrationForm", () => {
   });
 
   it("password have a min lengh of 8 characters", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils, onFinishMock } = setup();
 
     fireEvent.change(utils.getByLabelText(/password/i), {
       target: { value: "foo" },
@@ -153,8 +161,7 @@ describe("RegistrationForm", () => {
   });
 
   it("password have 1 uppercase letter", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils, onFinishMock } = setup();
 
     fireEvent.change(utils.getByLabelText(/password/i), {
       target: { value: "abratesesamo" },
@@ -169,8 +176,7 @@ describe("RegistrationForm", () => {
   });
 
   it("password have 1 lowercase letter", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils, onFinishMock } = setup();
 
     fireEvent.change(utils.getByLabelText(/password/i), {
       target: { value: "ABRATESESAMO" },
@@ -185,8 +191,7 @@ describe("RegistrationForm", () => {
   });
 
   it("password have 1 number", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils, onFinishMock } = setup();
 
     fireEvent.change(utils.getByLabelText(/password/i), {
       target: { value: "Password" },
@@ -201,8 +206,7 @@ describe("RegistrationForm", () => {
   });
 
   it("website is validated correctly", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils, onFinishMock } = setup();
 
     fireEvent.change(utils.getByLabelText(/website/i), {
       target: { value: "foo" },
@@ -215,8 +219,7 @@ describe("RegistrationForm", () => {
   });
 
   it("website with no http/https is accepted", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils } = setup();
 
     fireEvent.change(utils.getByLabelText(/website/i), {
       target: { value: "subdomain.host.com" },
@@ -230,8 +233,7 @@ describe("RegistrationForm", () => {
   });
 
   it("website with port number is accepted", async () => {
-    const onFinishMock = jest.fn(() => Promise.resolve());
-    const utils = render(<RegistrationForm onSuccess={onFinishMock} />);
+    const { utils } = setup();
 
     fireEvent.change(utils.getByLabelText(/website/i), {
       target: { value: "https://yet.another.domain.ai:8080" },
